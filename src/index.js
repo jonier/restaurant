@@ -1,4 +1,5 @@
 const express = require('express');
+const morgan = require('morgan');
 const sequelize = require("./database/db");
 
 const bodyParser = require("body-parser");
@@ -8,6 +9,7 @@ const userRouter = require("./v1/routes/userRouter");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(morgan('dev'));
 app.use(bodyParser.json()) // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-
 app.use("/api/v1/products", productRouter);
