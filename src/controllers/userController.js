@@ -1,5 +1,5 @@
 const User = require("../models/user");
-
+const { getErrorFromCoreOrDb } = require("../library/functions");
 const getAllUsers = (req, res, next) => {
     User.findAll()
     .then(users => {
@@ -27,45 +27,67 @@ const postAddUser = (req, res, next) => {
     const name = req.body.name;
     const userName = req.body.userName;
     const email = req.body.email;
+    console.log('Estos son los datos: ', req.body);
+    try {
+        User.create({
+            name, //name: name,
+            userName,
+            email,
+            createdAt: new Date().toLocaleString("en-US", { timeZone: "UTC" }),
+            updatedAt: new Date().toLocaleString("en-US", { timeZone: "UTC" }),
+        })
+        .then(result => {
+            res.status(201).send({ status: "OK", data: result });
+            //msgFile.success(req, res, result, 200)
+        })
+        .catch(error => {
+            //origin = 'CORE' => Possibly some data is missing in the body
+            //origin = 'DB'   => The error is caused by the Database when it is validating Primary and unique keys
+ 
+            const message = getErrorFromCoreOrDb(error.errors);
 
-    User.create({
-        id: 1,
-        name: name,
-        userName: userName,
-        email: email,
-        createdAt: new Date().toLocaleString("en-US", { timeZone: "UTC" }),
-        updatedAt: new Date().toLocaleString("en-US", { timeZone: "UTC" }),
-    })
-    .then(result => {
-        res.status(201).send({ status: "OK", data: result });
-        //msgFile.success(req, res, result, 200)
-    })
-    .catch(error => {
-        console.log("Error: ", error);
-    })
+            res.send(
+                { 
+                    error: true, 
+                    data: {
+                        origin: error.errors[0].origin, 
+                        path: error.errors[0].path, 
+                        validatorKey: error.errors[0].validatorKey, 
+                        message: message
+                    } 
+                })
+        })
+    } catch (error) {
+        res.send({ error: true, data: error })
+    }
 }
 
 const postEditUser = (req, res, next) => {    
-    const userId = req.body.id;
-    const name = req.body.name;
-    const userName = req.body.userName;
-    const email = req.body.email;
+ 
+    try {
+        const { userId, name, userName, email } = req.body;
 
-    User.findByPk(userId)
-    .then(user => {
-        user.name = name;
-        user.userName = userName;
-        user.email = email;
-        user.updatedAt = new Date().toLocaleString("en-US", { timeZone: "UTC" }),
-        user.save();
-        return user;
-    })
-    .then(user => {
-        res.status(200).send({status: 200, data: user })
-    })
-    .catch(error => {
-        console.log(error)
-    })
+        console.log('Esta es una validacion', name)
+
+        User.findByPk(userId)
+        .then(user => {
+            user.name = name;
+            user.userName = userName;
+            user.email = email;
+            user.updatedAt = new Date().toLocaleString("en-US", { timeZone: "UTC" }),
+            user.save();
+            return user;
+        })
+        .then(user => {
+            res.status(200).send({status: 200, data: user })
+        })
+        .catch(error => {
+            res.status(404).send({status: 404, data: "The user does not exist!" })
+        })      
+          
+    } catch (error) {
+        console.log('Otro Error: ', error)
+    }
 }
 
 const deleteUserById = (req, res, next) => {
@@ -83,10 +105,32 @@ const deleteUserById = (req, res, next) => {
     })
 }
 
+const postLogin = (req, res, next) => {
+    const email = req.body.email;
+
+    if(!email){
+        res.status(400).send({ status: 400, data: "The email is missing in the api body" })
+    }else{
+        User.findAll({
+            where: {
+                email: email
+            }
+        })
+        .then(user => {
+            res.status(200).send({ status: 200, data: user })
+        })
+        .catch(error => {
+            res.status(400).send({ status: 400, data: error })
+        })
+    }
+
+}
+
 module.exports = {
     getAllUsers,
     getUserByPk,
     postAddUser,
     postEditUser,
-    deleteUserById
+    deleteUserById,
+    postLogin
 }
