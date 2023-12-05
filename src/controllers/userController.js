@@ -2,6 +2,7 @@ const User = require("../models/user");
 
 const { getErrorFromCoreOrDb } = require("../library/functions");
 const { validationResult } = require("express-validator");
+
 const getAllUsers = (req, res, next) => {
     User.findAll()
     .then(users => {
@@ -27,16 +28,15 @@ const getUserByPk = (req, res, next) => {
 const postAddUser = (req, res, next) => {
 
     const result = validationResult(req);
-    console.log('Vea pues: ', result.isEmpty())
+    console.log('Vea pues: ', result)
     if (!result.isEmpty()) {
-        return res.send(`Hello, ${req.query.person}!`);
+        return res.send({error: result});
     }
-
 
     const name = req.body.name;
     const userName = req.body.userName;
     const email = req.body.email;
-    //console.log('Estos son los datos: ', req.body);
+
     try {
         User.create({
             name, //name: name,
@@ -69,6 +69,7 @@ const postAddUser = (req, res, next) => {
     } catch (error) {
         res.send({ error: true, data: error })
     }
+
 }
 
 const postEditUser = (req, res, next) => {    
