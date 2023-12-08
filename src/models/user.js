@@ -1,4 +1,6 @@
-const { Sequelize }  = require('sequelize');
+//bcrypt is used to create secure password
+const bcrypt = require('bcrypt');
+const { Sequelize } = require('sequelize');
 const sequelize = require('../database/db');
 
 const User = sequelize.define('user', {
@@ -17,10 +19,37 @@ const User = sequelize.define('user', {
         allowNull: false,
         unique: true
     },
+    address: {
+        type: Sequelize.STRING
+    },
     email: {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true
+    },
+    password: {
+        type: Sequelize.STRING
+    }
+},
+{
+    hooks: {
+        beforeCreate: async (user) => {
+            if (user.password) {
+                const salt = await bcrypt.genSaltSync(10, 'a');
+                user.password = bcrypt.hashSync(user.password, salt);
+            }
+        },
+        beforeUpdate: async (user) => {
+            if (user.password) {
+                const salt = await bcrypt.genSaltSync(10, 'a');
+                user.password = bcrypt.hashSync(user.password, salt);
+            }
+        }
+    },
+    instanceMethods: {
+        validPassword: (password) => {
+            return bcrypt.compareSync(password, this.password);
+        }
     }
 });
 
