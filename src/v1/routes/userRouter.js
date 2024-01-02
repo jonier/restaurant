@@ -18,7 +18,7 @@ router.post("/signup",
                 .withMessage('Not a valid e-mail address'),
             check('password').isLength({min: 8}).withMessage(`The string can be less than 8 characters`)
         ],
-        userController.postAddUser
+        userController.createUser
     );
 router.post("/login", userController.postLogin);
 

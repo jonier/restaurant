@@ -14,6 +14,7 @@ const OrderDetail = require('./models/orderDetail');
 //Routers
 const productRouter = require("./v1/routes/productRoutes");
 const userRouter = require("./v1/routes/userRouter");
+const orderStatusRouter = require("./v1/routes/ordenStatusRouter");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,6 +24,7 @@ app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/orderStatus", orderStatusRouter);
 
 //Creating relation between tables
 Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE'});

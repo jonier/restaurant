@@ -71,7 +71,7 @@ const deleteUserById = (req, res, next) => {
     })
 }
 
-const postAddUser = async(req, res, next) => {
+const createUser = async(req, res, next) => {
 
     const result = validationResult(req);
    
@@ -214,7 +214,7 @@ const postLogin = async (req, res, next) => {
 module.exports = {
     getAllUsers,
     getUserByPk,
-    postAddUser,
+    createUser,
     postEditUser,
     deleteUserById,
     postLogin
